@@ -1,0 +1,32 @@
+K8s Dashboard creation
+=============================
+
+1. Certificates
+
+You need a dashboard. key and dashboard.crt files for HTTPS. It is easy to create self signed ones.
+
+mkdir SHOME/certs
+
+cd SHOME/certs
+
+openssl genrsa -out dashboard.key 2048 
+openssl rsa -in dashboard.key -out dashboard.key
+
+openssl req -sha256 -new -key dashboard.key -out dashboard.csr
+openssl x509 -req -sha256 -days 365 -in dashboard.csr -signkey dashboard.key -out dashboard.crt
+
+Load the certificates into a secret:
+=====================================
+i)Create a Namespace with Below cmd
+
+Ex: kubectl create namespace kubernetes-dashboard
+
+ii) Create a Secret
+ 
+Ex: kubectl -n kubernetes-dashboard create secret generic kubernetes-dashboard-certs --from-file=$HOME/certs
+
+2. Deploy dashboard
+
+Use the recommended setup to deploy the kubernetes-dashboard service account, role, rolebinding, deployment and service.
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta7/aio/deploy/recommended.yaml
