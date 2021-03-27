@@ -29,4 +29,42 @@ Ex: kubectl -n kubernetes-dashboard create secret generic kubernetes-dashboard-c
 
 Use the recommended setup to deploy the kubernetes-dashboard service account, role, rolebinding, deployment and service.
 
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta7/aio/deploy/recommended.yaml
+Ex: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta7/aio/deploy/recommended.yaml
+
+#once we deploy above url it will create Deployment object that Deployment OBJ will Create Repliccaset and service
+defalutly it will create ClusterIp type to access the Dash Board we Have to Chane it as a NodePort type
+
+Ex: kubectl edit service kubernetes-dashboard -n kubernetes-dashboard
+
+3.Once you get NodePort u can Access DashBoard to Login to dashboard we have to provide kubconfig file or token
+to get the token we have to create a service account with below code
+========================================================================
+# vi k8sdashboard_serviceaccount.yml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8s-admin
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: k8s-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: k8s-admin
+  namespace: kubernetes-dashboard
+==================================================================
+4. to get the token we have execute below command
+Ex: kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep k8s-admin | awk '{print$1}')
+
+# we get token as Like this 
+
+eyJhbGciOiJSUzI1NiIsImtpZCI6ImJSUkpYRUl3ZVZjQjNMRC1Sb3Q2ZEVKSXliSlA3dDg0aGFpTjNqYVp6bGcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJrOHMtYWRtaW4tdG9rZW4tenY3ZnIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiazhzLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiY2M1ZTI1ZWEtZTJhYy00YTRmLWE4YzQtNTNiZDI1MmU4MzMyIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmVybmV0ZXMtZGFzaGJvYXJkOms4cy1hZG1pbiJ9.D-L1Xjaijmaoo9F2XFdwNVYGL7gIa1fFITbAJjQGW_Yxl-0UovjD7pM4kz6Q3ajmGYzeLPJ7Sp5EuzIUml5stcSjalHOHQsLsS_5KxC6xnzolBWeIpimfE9niv9CPCQfT_TPne66uFPhsYpmTPVSYE7eCNt12CpYwGtKX537D4VVzihCpyq92g9XhBa2bwZbAEP5gFV3UX6B9gdR_LxRgzJ0GeBCSaXvrKS7etPE56DNBOmyuLoiIm4fHJzXJYGlWx6UQ74kgk8WmxdJJTJeQLbANE7iKn6qWZ1WxnEUJow0KyHK1e8jVBp9VM9ZGh5w_k-_vPS-bredY1Q2JIKdLg
+
+
+#if we Put the token we can able to access K8s DashBoard 
